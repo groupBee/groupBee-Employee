@@ -18,3 +18,22 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  main:
+    allow-bean-definition-overriding: true
+  ldap:
+    urls: ${LDAP_URL}
+    base: ${LDAP_BASE}
+    username: ${LDAP_USERNAME}
+    password: ${LDAP_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+
+#logging:
+#  level:
+#    org:
+#      springframework:
+#        boot:
+#          autoconfigure: DEBUG
