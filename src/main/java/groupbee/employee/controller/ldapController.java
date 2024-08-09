@@ -5,12 +5,14 @@ import groupbee.employee.service.ldap.LdapService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class ldapController {
    private final LdapService ldapService;
    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();

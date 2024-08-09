@@ -1,5 +1,8 @@
 server:
   port: 9522
+  servlet:
+    session:
+      timeout: 3600
 
 spring:
   datasource:
@@ -25,11 +28,15 @@ spring:
     base: ${LDAP_BASE}
     username: ${LDAP_USERNAME}
     password: ${LDAP_PASSWORD}
+  session:
+    store-type: redis
+    redis:
+      repository-type: indexed
+
   data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
-
 
 #logging:
 #  level:

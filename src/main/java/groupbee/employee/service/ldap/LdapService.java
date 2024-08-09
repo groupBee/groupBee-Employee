@@ -32,7 +32,8 @@ public class LdapService {
     public List<LdapDto> getAllLdapEntries() {
         LdapQuery query = LdapQueryBuilder.query()
                 .base("") // base DN 설정
-                .where("objectClass").is("person");
+                .where("objectClass").is("person")
+                .and("memberOf").is("cn=ipausers,cn=groups,cn=accounts,dc=groupbee,dc=co,dc=kr");
 
         List<Attributes> results = ldapTemplate.search(query, (AttributesMapper<Attributes>) (attributes) -> attributes);
 

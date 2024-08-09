@@ -1,9 +1,6 @@
 package groupbee.employee.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -12,6 +9,8 @@ import javax.naming.directory.Attributes;
 import java.util.HashMap;
 import java.util.Map;
 
+@Setter
+@Getter
 @Data
 @Builder
 @AllArgsConstructor
@@ -31,11 +30,4 @@ public class LdapDto {
         }
     }
 
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(Map<String, Object> attributes) {
-        this.attributes = attributes;
-    }
 }
