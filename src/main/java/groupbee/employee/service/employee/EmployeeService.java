@@ -6,11 +6,13 @@ import groupbee.employee.entity.EmployeeEntity;
 import groupbee.employee.mapper.EmployeeMapper;
 import groupbee.employee.repository.EmployeeRepository;
 import groupbee.employee.service.redis.RedisService;
+import groupbee.employee.service.session.SessionService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.data.redis.RedisIndexedSessionRepository;
@@ -29,6 +31,7 @@ public class EmployeeService {
     private final BCryptPasswordEncoder encoder;
     private final HttpSession httpSession;
     private final RedisService redisService;
+    private final SessionService sessionService;
     private final Map<String, Object> response = new HashMap<>();
 
     @Transactional
@@ -110,6 +113,7 @@ public class EmployeeService {
     public Map<String,Object> logout(){
         if (httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null) {
             response.put("status", "fail");
+//            ResponseEntity.status(501).body("로그인이 필요합니다.");
             response.put("message", "로그인이 필요합니다.");
             return response;
         }
@@ -159,6 +163,16 @@ public class EmployeeService {
         return response;
     }
 
+    public Map<String, Object> getAuthEmployeeInfo(String Cookie) {
+        System.out.println("Employee service Cookie: " + Cookie);
+        System.out.println(sessionService.getSessionId(Cookie));
+//        EmployeeEntity entity = employeeRepository.findByPotalId();
+
+        response.put("status", "success");
+//        response.put("data", employeeData(entity));
+        response.put("message", "조회 성공");
+        return response;
+    }
     public Map<String,Object> employeeData(EmployeeEntity entity){
         Map<String,Object> response = new HashMap<>();
         response.put("id",entity.getId());

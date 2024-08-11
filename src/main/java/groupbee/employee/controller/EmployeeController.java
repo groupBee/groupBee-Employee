@@ -1,12 +1,12 @@
 package groupbee.employee.controller;
 
-import groupbee.employee.dto.EmployeeDto;
 import groupbee.employee.service.employee.EmployeeService;
+import groupbee.employee.service.feign.EmployeeFeignClient;
 import groupbee.employee.service.ldap.LdapService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
-import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -15,8 +15,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class EmployeeController {
+    private final HttpSession httpSession;
     private final EmployeeService employService;
     private final LdapService ldapService;
+    private final EmployeeFeignClient employeeFeignClient;
 
     @PutMapping("/employee/sync")
     public Map<String,Object> syncEmployee() {
@@ -34,7 +36,17 @@ public class EmployeeController {
     }
 
     @GetMapping("/employee/info")
-    public Map<String,Object> getEmployeeInfo() {
+    public Map<String,Object> getEmployeeInfo(HttpServletRequest request) {
         return employService.getEmployeeInfo();
+    }
+
+    @GetMapping("employee/auth/info")
+    public Map<String,Object> getAuthInfo(HttpServletRequest request) {
+        return employService.getAuthEmployeeInfo(request.getHeader("Cookie"));
+    }
+
+    @GetMapping("/employee/test")
+    public Map<String,Object> test() {
+        return employeeFeignClient.getUserInfo();
     }
 }
