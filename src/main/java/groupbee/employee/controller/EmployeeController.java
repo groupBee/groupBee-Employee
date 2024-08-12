@@ -3,9 +3,11 @@ package groupbee.employee.controller;
 import groupbee.employee.service.employee.EmployeeService;
 import groupbee.employee.service.feign.EmployeeFeignClient;
 import groupbee.employee.service.ldap.LdapService;
+import groupbee.employee.service.session.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,13 +42,8 @@ public class EmployeeController {
         return employService.getEmployeeInfo();
     }
 
-    @GetMapping("employee/auth/info")
-    public Map<String,Object> getAuthInfo(HttpServletRequest request) {
-        return employService.getAuthEmployeeInfo(request.getHeader("Cookie"));
-    }
-
-    @GetMapping("/employee/test")
-    public Map<String,Object> test() {
+    @GetMapping("/employee/feign")
+    public Map<String,Object> getAuthEmployeeInfo() {
         return employeeFeignClient.getUserInfo();
     }
 }
