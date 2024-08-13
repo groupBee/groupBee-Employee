@@ -1,4 +1,4 @@
-FROM openjdk:17
+FROM openjdk:21
 ARG JAR_FILE=app.jar
 COPY ${JAR_FILE} app.jar
 EXPOSE 9522
