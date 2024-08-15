@@ -25,5 +25,6 @@ public class EmployeeDto {
   private Long departmentId;
   private String profileFile;
   private String companyName;
+  private Boolean isAdmin;
 
 }

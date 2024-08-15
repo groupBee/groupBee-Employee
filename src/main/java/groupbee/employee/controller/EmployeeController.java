@@ -7,6 +7,7 @@ import groupbee.employee.service.session.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
 import org.springframework.web.bind.annotation.*;
@@ -23,27 +24,22 @@ public class EmployeeController {
     private final EmployeeFeignClient employeeFeignClient;
 
     @PutMapping("/employee/sync")
-    public Map<String,Object> syncEmployee() {
+    public ResponseEntity<Map<String,Object>> syncEmployee() {
         return employService.sync(ldapService.getAllLdapEntries());
     }
 
     @PostMapping("/employee/auth/login")
-    public Map<String,Object> login(@RequestPart("data") Map<String,String> userLoginData) {
+    public ResponseEntity<Map<String,Object>> login(@RequestPart("data") Map<String,String> userLoginData) {
         return employService.checkLongin(userLoginData.get("id"), userLoginData.get("passwd"));
     }
 
     @PostMapping("/employee/auth/logout")
-    public Map<String,Object> logout() {
+    public ResponseEntity<Map<String,Object>> logout() {
         return employService.logout();
     }
 
     @GetMapping("/employee/info")
-    public Map<String,Object> getEmployeeInfo(HttpServletRequest request) {
+    public ResponseEntity<Map<String,Object>> getEmployeeInfo(HttpServletRequest request) {
         return employService.getEmployeeInfo();
-    }
-
-    @GetMapping("/employee/feign")
-    public Map<String,Object> getAuthEmployeeInfo() {
-        return employeeFeignClient.getUserInfo();
     }
 }

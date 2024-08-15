@@ -53,7 +53,7 @@ public class EmployeeEntity {
     @Column(name = "address", length = Integer.MAX_VALUE)
     private String address;
 
-    @Column(name = "membership_status")
+    @Column(name = "membership_status",columnDefinition = "boolean default true")
     private Boolean membershipStatus;
 
     @NotNull
@@ -65,4 +65,6 @@ public class EmployeeEntity {
     @Column(name = "profile_file", length = Integer.MAX_VALUE)
     private String profileFile;
 
+    @Column(name = "is_admin",columnDefinition = "boolean default false")
+    private Boolean isAdmin;
 }

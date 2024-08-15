@@ -1,5 +1,7 @@
 package groupbee.employee.service.employee;
 
+import groupbee.employee.LoginStatusEnum;
+import groupbee.employee.StatusEnum;
 import groupbee.employee.dto.EmployeeDto;
 import groupbee.employee.dto.LdapDto;
 import groupbee.employee.entity.EmployeeEntity;
@@ -10,15 +12,11 @@ import groupbee.employee.service.session.SessionService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.BeanUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.session.FindByIndexNameSessionRepository;
-import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 import org.springframework.stereotype.Service;
 
-import java.beans.Beans;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +38,7 @@ public class EmployeeService {
     }
 
     @Transactional
-    public Map<String, Object> sync (List<LdapDto> ldapDtos){
+    public ResponseEntity<Map<String, Object>> sync (List<LdapDto> ldapDtos){
         Map<String, Object> response = new HashMap<>();
         try {
             ldapDtos.forEach(ldapDto -> {
@@ -64,35 +62,33 @@ public class EmployeeService {
                     employeeRepository.save(employeeMapper.toEntity(employeeDto));
                 }
             });
-            response.put("status","success");
-            response.put("message","동기화가 완료되었습니다.");
+            response.put("status",StatusEnum.OK);
+            return ResponseEntity.status(200).body(response);
         } catch (Exception e) {
-            response.put("status","fail");
-            response.put("message","동기화가 실패하였습니다.");
+            response.put("status","Failed");
             e.printStackTrace();
+            return ResponseEntity.status(500).body(response);
         }
-        return response;
     }
     @Transactional
-    public Map<String,Object> checkLongin(String potalId, String passwd){
-        Map<String,Object> response = new HashMap<>();
+    public ResponseEntity<Map<String,Object>> checkLongin(String potalId, String passwd){
         if (employeeRepository.findByPotalId(potalId) == null){
-            response.put("status","success");
-            response.put("data",false);
-            response.put("message","아이디가 존재하지 않습니다.");
-            return response;
+            response.put("status", LoginStatusEnum.BAD_ID);
+            return ResponseEntity.status(401).body(response);
         }
         if(encoder.matches(passwd,employeeRepository.findByPotalId(potalId).getPasswd())){
+            if(!employeeRepository.findByPotalId(potalId).getMembershipStatus()){
+                response.put("status", LoginStatusEnum.NOT_FOUND);
+                return ResponseEntity.status(403).body(response);
+            }
             httpSession.setAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME,potalId);
-            response.put("status","success");
-            response.put("data",httpSession.getId());
-            response.put("message","로그인 성공");
+            response.put("status", LoginStatusEnum.OK);
+            response.put("isAdmin",employeeRepository.findByPotalId(potalId).getIsAdmin());
+            return ResponseEntity.status(200).body(response);
         } else {
-            response.put("status","success");
-            response.put("data",false);
-            response.put("message","비밀번호가 일치하지 않습니다.");
+            response.put("status", LoginStatusEnum.BAD_PASSWORD);
+            return ResponseEntity.status(402).body(response);
         }
-        return response;
     }
 
     @Transactional
@@ -110,17 +106,14 @@ public class EmployeeService {
     }
 
     @Transactional
-    public Map<String,Object> logout(){
+    public ResponseEntity<Map<String,Object>> logout(){
         if (httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null) {
-            response.put("status", "fail");
-//            ResponseEntity.status(501).body("로그인이 필요합니다.");
-            response.put("message", "로그인이 필요합니다.");
-            return response;
+            response.put("status", StatusEnum.BAD_REQUEST);
+            return ResponseEntity.status(400).body(response);
         }
         httpSession.removeAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME);
-        response.put("status", "success");
-        response.put("message", "로그아웃 성공");
-        return response;
+        response.put("status", StatusEnum.OK);
+        return ResponseEntity.status(200).body(response);
     }
 
     @Transactional
@@ -141,38 +134,23 @@ public class EmployeeService {
         return response;
     }
 
-    public Map<String, Object> getEmployeeInfo() {
+    public ResponseEntity<Map<String, Object>> getEmployeeInfo() {
         if (httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null) {
-            response.put("status", "fail");
-            response.put("data", null);
-            response.put("message", "로그인이 필요합니다.");
-            return response;
+            response.put("status", StatusEnum.BAD_REQUEST);
+            return ResponseEntity.status(400).body(response);
         }
         String id = httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString();
         EmployeeEntity entity = employeeRepository.findByPotalId(id);
         if (entity == null) {
-            response.put("status", "fail");
-            response.put("data", null);
-            response.put("message", "존재하지 않는 사용자입니다.");
-            return response;
+            response.put("status", LoginStatusEnum.BAD_ID);
+            return ResponseEntity.status(401).body(response);
         }
 
-        response.put("status", "success");
+        response.put("status", StatusEnum.OK);
         response.put("data", employeeData(entity));
-        response.put("message", "조회 성공");
-        return response;
+        return ResponseEntity.status(200).body(response);
     }
 
-    public Map<String, Object> getAuthEmployeeInfo(String Cookie) {
-        System.out.println("Employee service Cookie: " + Cookie);
-        System.out.println(sessionService.getSessionId(Cookie));
-//        EmployeeEntity entity = employeeRepository.findByPotalId();
-
-        response.put("status", "success");
-//        response.put("data", employeeData(entity));
-        response.put("message", "조회 성공");
-        return response;
-    }
     public Map<String,Object> employeeData(EmployeeEntity entity){
         Map<String,Object> response = new HashMap<>();
         response.put("id",entity.getId());
