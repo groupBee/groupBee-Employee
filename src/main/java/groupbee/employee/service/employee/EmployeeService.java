@@ -72,6 +72,7 @@ public class EmployeeService {
     }
     @Transactional
     public ResponseEntity<Map<String,Object>> checkLongin(String potalId, String passwd){
+        Map<String, Object> response = new HashMap<>();
         if (employeeRepository.findByPotalId(potalId) == null){
             response.put("status", LoginStatusEnum.BAD_ID);
             return ResponseEntity.status(401).body(response);
@@ -107,6 +108,7 @@ public class EmployeeService {
 
     @Transactional
     public ResponseEntity<Map<String,Object>> logout(){
+        Map<String, Object> response = new HashMap<>();
         if (httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null) {
             response.put("status", StatusEnum.BAD_REQUEST);
             return ResponseEntity.status(400).body(response);
@@ -135,6 +137,7 @@ public class EmployeeService {
     }
 
     public ResponseEntity<Map<String, Object>> getEmployeeInfo() {
+        Map<String, Object> response = new HashMap<>();
         if (httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null) {
             response.put("status", StatusEnum.BAD_REQUEST);
             return ResponseEntity.status(400).body(response);
