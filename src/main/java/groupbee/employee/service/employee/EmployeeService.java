@@ -76,11 +76,13 @@ public class EmployeeService {
         Map<String, Object> response = new HashMap<>();
         if (employeeRepository.findByPotalId(potalId) == null){
             response.put("status", LoginStatusEnum.BAD_ID);
+            httpSession.invalidate();
             return ResponseEntity.status(401).body(response);
         }
         if(encoder.matches(passwd,employeeRepository.findByPotalId(potalId).getPasswd())){
             if(!employeeRepository.findByPotalId(potalId).getMembershipStatus()){
                 response.put("status", LoginStatusEnum.NOT_FOUND);
+                httpSession.invalidate();
                 return ResponseEntity.status(403).body(response);
             }
             httpSession.setAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME,potalId);
@@ -89,6 +91,7 @@ public class EmployeeService {
             return ResponseEntity.status(200).body(response);
         } else {
             response.put("status", LoginStatusEnum.BAD_PASSWORD);
+            httpSession.invalidate();
             return ResponseEntity.status(402).body(response);
         }
     }
@@ -157,7 +160,7 @@ public class EmployeeService {
 
 
     @Transactional
-    public ResponseEntity<Map<String, Object>> getEmployeeList(String id, String passwd) {
+    public ResponseEntity<Map<String, Object>> getEmployeeList() {
         Map<String,Object> response = new HashMap<>();
         List<EmployeeEntity> entities = employeeRepository.findAll();
         List<EmployeeDto> employeeDtos = new ArrayList<>();
