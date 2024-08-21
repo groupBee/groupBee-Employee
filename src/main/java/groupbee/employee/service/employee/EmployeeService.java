@@ -115,9 +115,11 @@ public class EmployeeService {
         Map<String, Object> response = new HashMap<>();
         if (httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null) {
             response.put("status", StatusEnum.BAD_REQUEST);
+            httpSession.invalidate();
             return ResponseEntity.status(400).body(response);
         }
         httpSession.removeAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME);
+        httpSession.invalidate();
         response.put("status", StatusEnum.OK);
         return ResponseEntity.status(200).body(response);
     }
