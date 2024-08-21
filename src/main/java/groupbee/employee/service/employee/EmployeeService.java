@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,6 +152,22 @@ public class EmployeeService {
 
         response.put("status", StatusEnum.OK);
         response.put("data", employeeData(entity));
+        return ResponseEntity.status(200).body(response);
+    }
+
+
+    @Transactional
+    public ResponseEntity<Map<String, Object>> getEmployeeList(String id, String passwd) {
+        Map<String,Object> response = new HashMap<>();
+        List<EmployeeEntity> entities = employeeRepository.findAll();
+        List<EmployeeDto> employeeDtos = new ArrayList<>();
+        for(EmployeeEntity entity : entities){
+            EmployeeDto employeeDto = employeeMapper.toDto(entity);
+            employeeDto.setPasswd("");
+            employeeDtos.add(employeeDto);
+        }
+        response.put("status", StatusEnum.OK);
+        response.put("data", employeeDtos);
         return ResponseEntity.status(200).body(response);
     }
 

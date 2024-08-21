@@ -42,4 +42,9 @@ public class EmployeeController {
     public ResponseEntity<Map<String,Object>> getEmployeeInfo(HttpServletRequest request) {
         return employService.getEmployeeInfo();
     }
+
+    @GetMapping("/employee/list")
+    public ResponseEntity<Map<String,Object>> getEmployeeList() {
+        return employService.getEmployeeList();
+    }
 }
