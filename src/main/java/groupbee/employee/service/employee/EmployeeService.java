@@ -164,24 +164,24 @@ public class EmployeeService {
     @Transactional
     public ResponseEntity<Map<String, Object>> getEmployeeList() {
         Map<String,Object> response = new HashMap<>();
-        Map<String, Object> data = new HashMap<>();
         List<Map<String,Object>> dataList = new ArrayList<>();
         List<EmployeeEntity> entities = employeeRepository.findAll();
         for(EmployeeEntity entity : entities){
-           data.put("name",entity.getName());
-           data.put("position",entity.getPosition());
-           data.put("email",entity.getEmail());
-           data.put("extensionCall",entity.getExtensionCall());
-           data.put("phoneNumber",entity.getPhoneNumber());
-           data.put("address",entity.getAddress());
-           data.put("membershipStatus",entity.getMembershipStatus());
-           data.put("departmentName",entity.getDepartment().getDepartmentName());
-           data.put("departmentNumber",entity.getDepartment().getId());
-           data.put("id",entity.getId());
-           data.put("potalId",entity.getPotalId());
-           data.put("companyName",entity.getCompanyName());
-           data.put("residentRegistrationNumber",entity.getResidentRegistrationNumber());
-           dataList.add(data);
+            Map<String, Object> data = new HashMap<>();
+            data.put("name",entity.getName());
+            data.put("position",entity.getPosition());
+            data.put("email",entity.getEmail());
+            data.put("extensionCall",entity.getExtensionCall());
+            data.put("phoneNumber",entity.getPhoneNumber());
+            data.put("address",entity.getAddress());
+            data.put("membershipStatus",entity.getMembershipStatus());
+            data.put("departmentName",entity.getDepartment().getDepartmentName());
+            data.put("departmentNumber",entity.getDepartment().getId());
+            data.put("id",entity.getId());
+            data.put("potalId",entity.getPotalId());
+            data.put("companyName",entity.getCompanyName());
+            data.put("residentRegistrationNumber",entity.getResidentRegistrationNumber());
+            dataList.add(data);
         }
         response.put("status", StatusEnum.OK);
         response.put("data", dataList);
