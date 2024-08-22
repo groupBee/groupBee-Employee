@@ -38,6 +38,11 @@ public class EmployeeController {
         return employService.logout();
     }
 
+    @GetMapping("/employee/auth/islogin")
+    public ResponseEntity<Map<String,Object>> isLogin() {
+        return employService.getIsLogin();
+    }
+
     @GetMapping("/employee/info")
     public ResponseEntity<Map<String,Object>> getEmployeeInfo(HttpServletRequest request) {
         return employService.getEmployeeInfo();
@@ -47,4 +52,6 @@ public class EmployeeController {
     public ResponseEntity<Map<String,Object>> getEmployeeList() {
         return employService.getEmployeeList();
     }
+
+
 }

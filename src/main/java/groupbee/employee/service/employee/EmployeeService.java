@@ -97,6 +97,17 @@ public class EmployeeService {
     }
 
     @Transactional
+    public ResponseEntity<Map<String,Object>> getIsLogin(){
+        Map<String, Object> response = new HashMap<>();
+        if(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null){
+            return ResponseEntity.status(400).body(response);
+        }
+        response.put("status", LoginStatusEnum.OK);
+        response.put("isAdmin",employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getIsAdmin());
+        return ResponseEntity.status(200).body(response);
+    }
+
+    @Transactional
     public Map<String,Object> delete(String id){
         Map<String, Object> response = new HashMap<>();
         if(employeeRepository.countById(id) == 0){
