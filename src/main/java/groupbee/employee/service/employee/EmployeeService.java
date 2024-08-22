@@ -100,6 +100,7 @@ public class EmployeeService {
     public ResponseEntity<Map<String,Object>> getIsLogin(){
         Map<String, Object> response = new HashMap<>();
         if(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null){
+            httpSession.invalidate();
             return ResponseEntity.status(400).body(response);
         }
         response.put("status", LoginStatusEnum.OK);
