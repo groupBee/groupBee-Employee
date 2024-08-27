@@ -44,7 +44,7 @@ public class EmployeeController {
     public ResponseEntity<Map<String,Object>> isLogin() {
         return employService.getIsLogin();
     }
-    @GetMapping("/employee/auth/changepasswd")
+    @PutMapping("/employee/auth/changepasswd")
     public ResponseEntity<Map<String,Object>> changePasswd(@RequestPart("data") Map<String,Object> passwdData) {
         return employService.updatePassword(passwdData);
     }
