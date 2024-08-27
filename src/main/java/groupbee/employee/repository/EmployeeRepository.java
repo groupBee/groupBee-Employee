@@ -12,4 +12,6 @@ public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Intege
     EmployeeEntity findByPotalId(String potalId);
 
     void deleteByPotalId(String id);
+
+    void updateByPasswd(String passwd);
 }

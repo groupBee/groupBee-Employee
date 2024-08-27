@@ -42,6 +42,10 @@ public class EmployeeController {
     public ResponseEntity<Map<String,Object>> isLogin() {
         return employService.getIsLogin();
     }
+    @GetMapping("/employee/auth/change-passwd")
+    public ResponseEntity<Map<String,Object>> changePasswd(@RequestPart("data") Map<String,Object> passwdData) {
+        return employService.updatePassword(passwdData);
+    }
 
     @GetMapping("/employee/info")
     public ResponseEntity<Map<String,Object>> getEmployeeInfo(HttpServletRequest request) {
@@ -52,6 +56,7 @@ public class EmployeeController {
     public ResponseEntity<Map<String,Object>> getEmployeeList() {
         return employService.getEmployeeList();
     }
+
 
 
 }

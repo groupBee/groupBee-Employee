@@ -123,6 +123,19 @@ public class EmployeeService {
     }
 
     @Transactional
+    public ResponseEntity<Map<String,Object>> updatePassword(Map<String,Object> data){
+        Map<String, Object> response = new HashMap<>();
+        String passwd = employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getPasswd();
+        if(encoder.matches(data.get("old").toString(),passwd)){
+            employeeRepository.updateByPasswd(data.get("new").toString());
+            response.put("status", StatusEnum.OK);
+            return ResponseEntity.status(200).body(response);
+        }
+        response.put("status", StatusEnum.BAD_REQUEST);
+        return ResponseEntity.status(400).body(response);
+    }
+
+    @Transactional
     public ResponseEntity<Map<String,Object>> logout(){
         Map<String, Object> response = new HashMap<>();
         if (httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null) {
