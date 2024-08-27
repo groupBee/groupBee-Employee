@@ -151,7 +151,8 @@ public class EmployeeService {
             employeeRepository.updateByPasswd(encoder.encode(data.get("new").toString()),httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString());
             mailData.put("items", Arrays.asList("email",employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getEmail()));
             mailData.put("attr",Arrays.asList("password",data.get("new").toString(),"password2",data.get("new").toString()));
-            employeeRepository.updateByPasswd(data.get("new").toString(),employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getEmail());
+            mailFeignClient.editMailbox(mailData);
+            emailRepository.updateByPasswd(data.get("new").toString(),employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getEmail());
             response.put("status", StatusEnum.OK);
             return ResponseEntity.status(200).body(response);
         }
