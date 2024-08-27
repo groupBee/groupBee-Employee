@@ -1,17 +1,17 @@
 package groupbee.employee.repository;
 
 import groupbee.employee.entity.EmployeeEntity;
+import groupbee.employee.repository.querydsl.EmployeeRepositoryCustom;
+import groupbee.employee.repository.querydsl.EmployeeRepositoryCustomImpl;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Integer> {
+public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Integer>, EmployeeRepositoryCustom {
 
     long countById(String id);
 
     EmployeeEntity findByPotalId(String potalId);
 
     void deleteByPotalId(String id);
-
-    void updateByPasswd(String passwd);
 }

@@ -7,6 +7,7 @@ import groupbee.employee.dto.LdapDto;
 import groupbee.employee.entity.EmployeeEntity;
 import groupbee.employee.mapper.EmployeeMapper;
 import groupbee.employee.repository.EmployeeRepository;
+import groupbee.employee.service.feign.MailFeignClient;
 import groupbee.employee.service.redis.RedisService;
 import groupbee.employee.service.session.SessionService;
 import jakarta.servlet.http.HttpSession;
@@ -17,10 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +29,7 @@ public class EmployeeService {
     private final HttpSession httpSession;
     private final RedisService redisService;
     private final SessionService sessionService;
+    private final MailFeignClient mailFeignClient;
     private final Map<String, Object> response = new HashMap<>();
 
     @Transactional
@@ -55,12 +54,23 @@ public class EmployeeService {
                         .departmentId(Long.valueOf(ldapDto.getAttributes().get("departmentNumber").toString()))
                         .build();
                 if(employeeRepository.countById(employeeDto.getId()) == 0){
+                    Map<String, Object> data = new HashMap<>();
                     employeeDto.setMembershipStatus(true);
                     employeeDto.setPasswd(encoder.encode("p@ssw0rd"));
                     employeeRepository.save(employeeMapper.toEntity(employeeDto));
+                    data.put("local_part",employeeDto.getPotalId());
+                    data.put("domain","groupbee.co.kr");
+                    data.put("name",employeeDto.getName());
+                    data.put("quota","1024");
+                    data.put("password","p@ssw0rd");
+                    data.put("password2","p@ssw0rd");
+                    data.put("active","1");
+                    data.put("force_pw_update","0");
+                    data.put("tls_enforce_in","1");
+                    System.out.println(data);
+                    System.out.println(mailFeignClient.addMailbox(data));
                 } else {
-                    employeeDto.setPasswd(employeeRepository.findByPotalId(employeeDto.getPotalId()).getPasswd());
-                    employeeRepository.save(employeeMapper.toEntity(employeeDto));
+                    employeeRepository.updateWithoutPasswd(employeeMapper.toEntity(employeeDto));
                 }
             });
             response.put("status",StatusEnum.OK);
@@ -127,7 +137,10 @@ public class EmployeeService {
         Map<String, Object> response = new HashMap<>();
         String passwd = employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getPasswd();
         if(encoder.matches(data.get("old").toString(),passwd)){
-            employeeRepository.updateByPasswd(data.get("new").toString());
+            Map<String, Object> mailData = new HashMap<>();
+            employeeRepository.updateByPasswd(encoder.encode(data.get("new").toString()),httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString());
+            mailData.put("items", Arrays.asList("email",employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getEmail()));
+            mailData.put("attr",Arrays.asList("password",data.get("new").toString(),"password2",data.get("new").toString()));
             response.put("status", StatusEnum.OK);
             return ResponseEntity.status(200).body(response);
         }

@@ -2,7 +2,7 @@ package groupbee.employee.config;
 
 import feign.Logger;
 import feign.RequestInterceptor;
-import groupbee.employee.interceptor.SessionInterceptor;
+import groupbee.employee.interceptor.MailInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class FeignConfig {
     @Bean
-    public RequestInterceptor sessionInterceptor() {
-        return new SessionInterceptor();
+    public RequestInterceptor MailInterceptor() {
+        return new MailInterceptor();
     }
 
     @Bean
