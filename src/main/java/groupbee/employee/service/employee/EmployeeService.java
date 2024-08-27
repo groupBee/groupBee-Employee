@@ -2,10 +2,14 @@ package groupbee.employee.service.employee;
 
 import groupbee.employee.LoginStatusEnum;
 import groupbee.employee.StatusEnum;
+import groupbee.employee.dto.EmailDto;
 import groupbee.employee.dto.EmployeeDto;
 import groupbee.employee.dto.LdapDto;
+import groupbee.employee.entity.EmailEntity;
 import groupbee.employee.entity.EmployeeEntity;
+import groupbee.employee.mapper.EmailMapper;
 import groupbee.employee.mapper.EmployeeMapper;
+import groupbee.employee.repository.EmailRepository;
 import groupbee.employee.repository.EmployeeRepository;
 import groupbee.employee.service.feign.MailFeignClient;
 import groupbee.employee.service.redis.RedisService;
@@ -28,6 +32,8 @@ public class EmployeeService {
     private final BCryptPasswordEncoder encoder;
     private final HttpSession httpSession;
     private final RedisService redisService;
+    private final EmailRepository emailRepository;
+    private final EmailMapper emailMapper;
     private final SessionService sessionService;
     private final MailFeignClient mailFeignClient;
     private final Map<String, Object> response = new HashMap<>();
@@ -56,6 +62,7 @@ public class EmployeeService {
                 if(employeeRepository.countById(employeeDto.getId()) == 0){
                     Map<String, Object> data = new HashMap<>();
                     employeeDto.setMembershipStatus(true);
+                    employeeDto.setIsAdmin(false);
                     employeeDto.setPasswd(encoder.encode("p@ssw0rd"));
                     employeeRepository.save(employeeMapper.toEntity(employeeDto));
                     data.put("local_part",employeeDto.getPotalId());
@@ -67,8 +74,11 @@ public class EmployeeService {
                     data.put("active","1");
                     data.put("force_pw_update","0");
                     data.put("tls_enforce_in","1");
-                    System.out.println(data);
-                    System.out.println(mailFeignClient.addMailbox(data));
+                    EmailEntity emailEntity = EmailEntity.builder()
+                            .email(employeeDto.getEmail())
+                            .password("p@ssw0rd")
+                            .build();
+                    emailRepository.save(emailEntity);
                 } else {
                     employeeRepository.updateWithoutPasswd(employeeMapper.toEntity(employeeDto));
                 }
@@ -141,6 +151,7 @@ public class EmployeeService {
             employeeRepository.updateByPasswd(encoder.encode(data.get("new").toString()),httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString());
             mailData.put("items", Arrays.asList("email",employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getEmail()));
             mailData.put("attr",Arrays.asList("password",data.get("new").toString(),"password2",data.get("new").toString()));
+            employeeRepository.updateByPasswd(data.get("new").toString(),employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getEmail());
             response.put("status", StatusEnum.OK);
             return ResponseEntity.status(200).body(response);
         }
@@ -160,6 +171,18 @@ public class EmployeeService {
         httpSession.invalidate();
         response.put("status", StatusEnum.OK);
         return ResponseEntity.status(200).body(response);
+    }
+
+    @Transactional
+    public ResponseEntity<EmailDto> getEmail(){
+        EmailDto emailDto = new EmailDto();
+        if (httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null) {
+            response.put("status", StatusEnum.BAD_REQUEST);
+            return ResponseEntity.status(400).body(null);
+        }
+        String email = employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getEmail();
+        emailDto = emailMapper.toDto(emailRepository.findByEmail(email));
+        return ResponseEntity.status(200).body(emailDto);
     }
 
     @Transactional
@@ -197,7 +220,6 @@ public class EmployeeService {
         response.put("data", employeeData(entity));
         return ResponseEntity.status(200).body(response);
     }
-
 
     @Transactional
     public ResponseEntity<Map<String, Object>> getEmployeeList() {

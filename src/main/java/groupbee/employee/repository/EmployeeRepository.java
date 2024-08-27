@@ -1,8 +1,7 @@
 package groupbee.employee.repository;
 
 import groupbee.employee.entity.EmployeeEntity;
-import groupbee.employee.repository.querydsl.EmployeeRepositoryCustom;
-import groupbee.employee.repository.querydsl.EmployeeRepositoryCustomImpl;
+import groupbee.employee.repository.querydsl.employee.EmployeeRepositoryCustom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

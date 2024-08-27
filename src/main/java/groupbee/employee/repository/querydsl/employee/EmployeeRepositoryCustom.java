@@ -1,4 +1,4 @@
-package groupbee.employee.repository.querydsl;
+package groupbee.employee.repository.querydsl.employee;
 
 import groupbee.employee.entity.EmployeeEntity;
 import org.springframework.stereotype.Repository;

@@ -1,10 +1,8 @@
-package groupbee.employee.repository.querydsl;
+package groupbee.employee.repository.querydsl.employee;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import groupbee.employee.dto.EmployeeDto;
 import groupbee.employee.entity.EmployeeEntity;
 import groupbee.employee.entity.QEmployeeEntity;
-import groupbee.employee.mapper.EmployeeMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 

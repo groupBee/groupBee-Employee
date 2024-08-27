@@ -1,5 +1,6 @@
 package groupbee.employee.controller;
 
+import groupbee.employee.dto.EmailDto;
 import groupbee.employee.service.employee.EmployeeService;
 import groupbee.employee.service.ldap.LdapService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,12 @@ public class EmployeeController {
     public ResponseEntity<Map<String,Object>> syncEmployee() {
         return employService.sync(ldapService.getAllLdapEntries());
     }
+
+    @GetMapping("/employee/auth/email")
+    public ResponseEntity<EmailDto> getEmail() {
+        return employService.getEmail();
+    }
+
 
     @PostMapping("/employee/auth/login")
     public ResponseEntity<Map<String,Object>> login(@RequestPart("data") Map<String,String> userLoginData) {
