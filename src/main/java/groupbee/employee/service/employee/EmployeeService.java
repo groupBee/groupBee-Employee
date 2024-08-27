@@ -211,14 +211,15 @@ public class EmployeeService {
             return ResponseEntity.status(400).body(response);
         }
         String id = httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString();
-        EmployeeEntity entity = employeeRepository.findByPotalId(id);
+        EmployeeEntity entity = employeeRepository.findListByPotalId(id);
         if (entity == null) {
             response.put("status", LoginStatusEnum.BAD_ID);
             return ResponseEntity.status(401).body(response);
         }
 
         response.put("status", StatusEnum.OK);
-        response.put("data", employeeData(entity));
+//        response.put("data", employeeData(entity));
+        response.put("data", employeeMapper.toDto(entity));
         return ResponseEntity.status(200).body(response);
     }
 

@@ -1,5 +1,6 @@
 package groupbee.employee.repository.querydsl.employee;
 
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import groupbee.employee.entity.EmployeeEntity;
 import groupbee.employee.entity.QEmployeeEntity;
@@ -31,5 +32,35 @@ public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom {
                 .set(employee.name, employeeEntity.getName())
                 .where(employee.id.eq(employeeEntity.getId()))
                 .execute();
+    }
+
+    @Override
+    @Transactional
+    public void updateAll(EmployeeEntity entity) {
+    }
+
+    @Override
+    public EmployeeEntity findListByPotalId(String potalId) {
+        return jpaQueryFactory.select(Projections.fields(
+                        EmployeeEntity.class,
+                        employee.id,
+                        employee.potalId,
+                        employee.name,
+                        employee.residentRegistrationNumber,
+                        employee.position,
+                        employee.email,
+                        employee.extensionCall,
+                        employee.phoneNumber,
+                        employee.address,
+                        employee.membershipStatus,
+                        employee.department,
+                        employee.profileFile,
+                        employee.companyName,
+                        employee.isAdmin
+                ))
+                .from(employee)
+                .where(employee.potalId.eq(potalId))
+                .fetch().getFirst();
+
     }
 }

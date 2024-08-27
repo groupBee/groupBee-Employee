@@ -8,4 +8,8 @@ public interface EmployeeRepositoryCustom {
     void updateByPasswd(String passwd,String potalId);
 
     void updateWithoutPasswd(EmployeeEntity entity);
+
+    void updateAll(EmployeeEntity entity);
+
+    EmployeeEntity findListByPotalId(String potalId);
 }
