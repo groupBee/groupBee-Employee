@@ -16,7 +16,7 @@ public class EmployeeListDto {
     private String email;
     private String phoneNumber;
     private Boolean membershipStatus;
-    private DepartmentEntity departmentName;
+    private DepartmentEntity department;
     private String extensionCall;
     private String profileFile;
     private String firstDay;

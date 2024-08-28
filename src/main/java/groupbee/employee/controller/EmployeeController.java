@@ -54,7 +54,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/employee/info")
-    public ResponseEntity<Map<String,Object>> getEmployeeInfo(HttpServletRequest request) {
+    public ResponseEntity<EmployeeDetailDto> getEmployeeInfo() {
         return employService.getEmployeeInfo();
     }
 

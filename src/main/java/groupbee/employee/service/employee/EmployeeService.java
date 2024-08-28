@@ -19,6 +19,7 @@ import groupbee.employee.service.session.SessionService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.session.FindByIndexNameSessionRepository;
@@ -203,24 +204,36 @@ public class EmployeeService {
         return ResponseEntity.status(200).body(response);
     }
 
-    public ResponseEntity<Map<String, Object>> getEmployeeInfo() {
-        Map<String, Object> response = new HashMap<>();
-        if (httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null) {
-            response.put("status", StatusEnum.BAD_REQUEST);
-            return ResponseEntity.status(400).body(response);
-        }
-        String id = httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString();
-        EmployeeEntity entity = employeeRepository.findByPotalId(id);
-        if (entity == null) {
-            response.put("status", LoginStatusEnum.BAD_ID);
-            return ResponseEntity.status(401).body(response);
+    @Transactional
+    public ResponseEntity<EmployeeDetailDto> getEmployeeInfo() {
+        // 세션에서 사용자의 포털 ID를 가져옵니다.
+        String portalId = (String) httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME);
+        if (portalId == null) {
+            httpSession.invalidate();
+            return ResponseEntity.status(400).body(null);
         }
 
-        response.put("status", StatusEnum.OK);
-//        response.put("data", employeeData(entity));
-        response.put("data", employeeMapper.toDto(entity));
-        return ResponseEntity.status(200).body(response);
+        // 포털 ID를 사용하여 데이터베이스에서 사용자의 ID를 찾습니다.
+        EmployeeDto employee = employeeMapper.toDto(employeeRepository.findByPotalId(portalId));
+        if (employee == null || employee.getId() == null) {
+            httpSession.invalidate();
+            return ResponseEntity.status(401).body(null);
+        }
+
+        String id = employee.getId();
+        System.out.println(id);
+
+        // 사용자의 ID를 사용하여 상세 정보를 가져옵니다.
+
+        EmployeeDetailDto employeeDetail = employeeRepository.findDetailById(id);
+        // 필요한 경우 추가 필드를 초기화
+        Hibernate.initialize(employeeDetail.getDepartment()); // 예시로 department 초기화
+        Hibernate.initialize(employeeDetail.getPosition());   // 예시로 position 초기화
+
+
+        return ResponseEntity.status(200).body(employeeDetail);
     }
+
 
     @Transactional
     public ResponseEntity<List<EmployeeListDto>> getEmployeeList() {

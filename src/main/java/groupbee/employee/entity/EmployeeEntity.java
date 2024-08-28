@@ -39,7 +39,7 @@ public class EmployeeEntity {
     private String residentRegistrationNumber;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "\"position\"", nullable = false)
     private RankEntity position;
@@ -60,7 +60,7 @@ public class EmployeeEntity {
     private Boolean membershipStatus;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "department_id", nullable = false)
     private DepartmentEntity department;

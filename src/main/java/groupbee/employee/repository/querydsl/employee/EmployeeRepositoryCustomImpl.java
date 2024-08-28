@@ -80,7 +80,9 @@ public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom {
         )).from(employee).fetch();
     }
 
+
     @Override
+    @Transactional
     public List<EmployeeListDto> findListByDepartmentId(Long departmentId) {
         return jpaQueryFactory.select(Projections.fields(
                 EmployeeListDto.class,
