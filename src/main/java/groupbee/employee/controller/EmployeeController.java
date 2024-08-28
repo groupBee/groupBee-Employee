@@ -1,6 +1,9 @@
 package groupbee.employee.controller;
 
-import groupbee.employee.dto.EmailDto;
+import groupbee.employee.dto.email.EmailDto;
+import groupbee.employee.dto.employee.EmployeeDetailDto;
+import groupbee.employee.dto.employee.EmployeeDto;
+import groupbee.employee.dto.employee.EmployeeListDto;
 import groupbee.employee.service.employee.EmployeeService;
 import groupbee.employee.service.ldap.LdapService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -55,10 +59,18 @@ public class EmployeeController {
     }
 
     @GetMapping("/employee/list")
-    public ResponseEntity<Map<String,Object>> getEmployeeList() {
+    public ResponseEntity<List<EmployeeListDto>> getEmployeeList() {
         return employService.getEmployeeList();
     }
 
+    @PatchMapping("/employee/update")
+    public ResponseEntity<Map<String,Object>> update(@RequestPart("data") EmployeeDto data) {
+        return employService.update(data);
+    }
 
+    @GetMapping("/employee/detail")
+    public ResponseEntity<EmployeeDetailDto> detail(@RequestParam("id") String id) {
+        return employService.getEmployeeDetail(id);
+    }
 
 }

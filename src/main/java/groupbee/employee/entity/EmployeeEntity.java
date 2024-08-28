@@ -39,8 +39,10 @@ public class EmployeeEntity {
     private String residentRegistrationNumber;
 
     @NotNull
-    @Column(name = "\"position\"", nullable = false, length = Integer.MAX_VALUE)
-    private String position;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "\"position\"", nullable = false)
+    private RankEntity position;
 
     @Column(name = "email", length = Integer.MAX_VALUE)
     private String email;
@@ -68,4 +70,10 @@ public class EmployeeEntity {
 
     @Column(name = "is_admin",columnDefinition = "boolean default false")
     private Boolean isAdmin;
+
+    @Column(name = "id_number", length = Integer.MAX_VALUE)
+    private String idNumber;
+
+    @Column(name = "first_day", length = Integer.MAX_VALUE)
+    private String firstDay;
 }

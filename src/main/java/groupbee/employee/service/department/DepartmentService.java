@@ -1,6 +1,6 @@
-package groupbee.employee.service.employee;
+package groupbee.employee.service.department;
 
-import groupbee.employee.dto.DepartmentDto;
+import groupbee.employee.dto.department.DepartmentDto;
 import groupbee.employee.mapper.DepartmentMapper;
 import groupbee.employee.repository.DepartmentRepository;
 import lombok.RequiredArgsConstructor;

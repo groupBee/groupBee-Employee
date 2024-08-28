@@ -1,6 +1,6 @@
 package groupbee.employee.mapper;
 
-import groupbee.employee.dto.EmailDto;
+import groupbee.employee.dto.email.EmailDto;
 import groupbee.employee.entity.EmailEntity;
 import org.mapstruct.Mapper;
 

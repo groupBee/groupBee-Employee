@@ -1,7 +1,5 @@
-package groupbee.employee.dto;
+package groupbee.employee.dto.employee;
 
-import groupbee.employee.entity.EmployeeEntity;
-import groupbee.employee.service.employee.DepartmentService;
 import lombok.*;
 
 
@@ -16,7 +14,7 @@ public class EmployeeDto {
   private String passwd;
   private String name;
   private String residentRegistrationNumber;
-  private String position;
+  private Long position;
   private String email;
   private String extensionCall;
   private String phoneNumber;
@@ -26,5 +24,6 @@ public class EmployeeDto {
   private String profileFile;
   private String companyName;
   private Boolean isAdmin;
-
+  private String idNumber;
+  private String firstDay;
 }

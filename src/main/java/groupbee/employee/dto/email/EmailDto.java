@@ -1,4 +1,4 @@
-package groupbee.employee.dto;
+package groupbee.employee.dto.email;
 
 import lombok.*;
 

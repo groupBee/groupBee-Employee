@@ -1,13 +1,9 @@
 package groupbee.employee.service.ldap;
 
-import groupbee.employee.dto.LdapDto;
+import groupbee.employee.dto.ldap.LdapDto;
 import groupbee.employee.service.redis.RedisService;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.ldap.core.AttributesMapper;
-import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.filter.AndFilter;
 import org.springframework.ldap.filter.EqualsFilter;
@@ -15,11 +11,8 @@ import org.springframework.ldap.query.LdapQuery;
 import org.springframework.ldap.query.LdapQueryBuilder;
 import org.springframework.stereotype.Service;
 
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 

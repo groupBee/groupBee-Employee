@@ -1,6 +1,5 @@
-package groupbee.employee.dto;
+package groupbee.employee.dto.department;
 
-import groupbee.employee.entity.DepartmentEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -2,9 +2,11 @@ package groupbee.employee.service.employee;
 
 import groupbee.employee.LoginStatusEnum;
 import groupbee.employee.StatusEnum;
-import groupbee.employee.dto.EmailDto;
-import groupbee.employee.dto.EmployeeDto;
-import groupbee.employee.dto.LdapDto;
+import groupbee.employee.dto.email.EmailDto;
+import groupbee.employee.dto.employee.EmployeeDetailDto;
+import groupbee.employee.dto.employee.EmployeeDto;
+import groupbee.employee.dto.employee.EmployeeListDto;
+import groupbee.employee.dto.ldap.LdapDto;
 import groupbee.employee.entity.EmailEntity;
 import groupbee.employee.entity.EmployeeEntity;
 import groupbee.employee.mapper.EmailMapper;
@@ -52,7 +54,7 @@ public class EmployeeService {
                         .id(ldapDto.getAttributes().get("ipaUniqueID").toString())
                         .potalId(ldapDto.getAttributes().get("uid").toString())
                         .name(ldapDto.getAttributes().get("cn").toString())
-                        .position(ldapDto.getAttributes().get("employeeType").toString())
+                        .position((Long) ldapDto.getAttributes().get("employeeType"))
                         .email(ldapDto.getAttributes().get("mail").toString())
                         .extensionCall( ldapDto.getAttributes().get("telephoneNumber").toString())
                         .phoneNumber( ldapDto.getAttributes().get("mobile").toString())
@@ -187,21 +189,18 @@ public class EmployeeService {
     }
 
     @Transactional
-    public Map<String, Object> update(EmployeeDto employeeDto) {
+    public ResponseEntity<Map<String, Object>> update(EmployeeDto employeeDto) {
         Map<String, Object> response = new HashMap<>();
         if(employeeRepository.countById(employeeDto.getId()) == 0){
             response.put("status", "fail");
             response.put("message", "사용자가 존재하지 않습니다.");
-            return response;
+            return ResponseEntity.status(401).body(response);
         }
         EmployeeEntity entity = employeeMapper.toEntity(employeeDto);
-        entity.setPasswd(encoder.encode(employeeDto.getPasswd() == null ?
-                employeeRepository.findByPotalId(employeeDto.getPotalId()).getPasswd() :
-                employeeDto.getPasswd()));
-        employeeRepository.save(entity);
+        employeeRepository.updateAll(entity);
         response.put("status", "success");
         response.put("message", "사용자가 정보가 변경되었습니다..");
-        return response;
+        return ResponseEntity.status(200).body(response);
     }
 
     public ResponseEntity<Map<String, Object>> getEmployeeInfo() {
@@ -211,7 +210,7 @@ public class EmployeeService {
             return ResponseEntity.status(400).body(response);
         }
         String id = httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString();
-        EmployeeEntity entity = employeeRepository.findListByPotalId(id);
+        EmployeeEntity entity = employeeRepository.findByPotalId(id);
         if (entity == null) {
             response.put("status", LoginStatusEnum.BAD_ID);
             return ResponseEntity.status(401).body(response);
@@ -224,32 +223,14 @@ public class EmployeeService {
     }
 
     @Transactional
-    public ResponseEntity<Map<String, Object>> getEmployeeList() {
-        Map<String,Object> response = new HashMap<>();
-        List<Map<String,Object>> dataList = new ArrayList<>();
-        List<EmployeeEntity> entities = employeeRepository.findAll();
-        for(EmployeeEntity entity : entities){
-            Map<String, Object> data = new HashMap<>();
-            data.put("name",entity.getName());
-            data.put("position",entity.getPosition());
-            data.put("email",entity.getEmail());
-            data.put("extensionCall",entity.getExtensionCall());
-            data.put("phoneNumber",entity.getPhoneNumber());
-            data.put("address",entity.getAddress());
-            data.put("membershipStatus",entity.getMembershipStatus());
-            data.put("departmentName",entity.getDepartment().getDepartmentName());
-            data.put("departmentNumber",entity.getDepartment().getId());
-            data.put("id",entity.getId());
-            data.put("potalId",entity.getPotalId());
-            data.put("companyName",entity.getCompanyName());
-            data.put("residentRegistrationNumber",entity.getResidentRegistrationNumber());
-            dataList.add(data);
+    public ResponseEntity<List<EmployeeListDto>> getEmployeeList() {
+        if(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null){
+            httpSession.invalidate();
+            return ResponseEntity.status(400).body(null);
         }
-        response.put("status", StatusEnum.OK);
-        response.put("data", dataList);
+        List<EmployeeListDto> response = employeeRepository.findListAll();
         return ResponseEntity.status(200).body(response);
     }
-
     public Map<String,Object> employeeData(EmployeeEntity entity){
         Map<String,Object> response = new HashMap<>();
         response.put("id",entity.getId());
@@ -266,6 +247,15 @@ public class EmployeeService {
         response.put("departmentName",entity.getDepartment().getDepartmentName());
         response.put("departmentNumber",entity.getDepartment().getId());
         return response;
+    }
+
+    @Transactional
+    public ResponseEntity<EmployeeDetailDto> getEmployeeDetail(String id) {
+        if(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null){
+            httpSession.invalidate();
+            return ResponseEntity.status(400).body(null);
+        }
+        return ResponseEntity.status(200).body(employeeRepository.findDetailById(id));
     }
 
 }

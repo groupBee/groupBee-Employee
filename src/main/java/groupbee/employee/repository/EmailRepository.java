@@ -1,6 +1,5 @@
 package groupbee.employee.repository;
 
-import groupbee.employee.dto.EmailDto;
 import groupbee.employee.entity.EmailEntity;
 import groupbee.employee.repository.querydsl.email.EmailRepositoryCustom;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,6 +1,6 @@
 package groupbee.employee.controller;
 
-import groupbee.employee.dto.LdapDto;
+import groupbee.employee.dto.ldap.LdapDto;
 import groupbee.employee.service.ldap.LdapService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
