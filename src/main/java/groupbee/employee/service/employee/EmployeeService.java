@@ -194,17 +194,17 @@ public class EmployeeService {
     }
 
     @Transactional
-    public ResponseEntity<Map<String, Object>> update(EmployeeUpdateDto employeeDto) {
+    public ResponseEntity<Map<String, Object>> update(EmployeeDto employeeDto, MultipartFile file) {
         Map<String, Object> response = new HashMap<>();
         if(employeeRepository.countById(employeeDto.getId()) == 0){
             response.put("status", "fail");
             response.put("message", "사용자가 존재하지 않습니다.");
             return ResponseEntity.status(401).body(response);
         }
-        if(!employeeDto.getFile().isEmpty()){
-            employeeDto.setProfileFile("https://minio.bmops.kro.kr/groupbee/"+minioService.uploadFile("groupbee","profile",employeeDto.getFile()));
+        if(!file.isEmpty()){
+            employeeDto.setProfileFile("https://minio.bmops.kro.kr/groupbee/"+minioService.uploadFile("groupbee","profile",file));
         }
-        EmployeeEntity entity = employeeMapper.updateToEntity(employeeDto);
+        EmployeeEntity entity = employeeMapper.toEntity(employeeDto);
         employeeRepository.updateAll(entity);
         response.put("status", "success");
         response.put("message", "사용자가 정보가 변경되었습니다..");

@@ -66,8 +66,9 @@ public class EmployeeController {
     }
 
     @PatchMapping("/employee/update")
-    public ResponseEntity<Map<String,Object>> update(@RequestPart("data") EmployeeUpdateDto data) {
-        return employService.update(data);
+    public ResponseEntity<Map<String,Object>> update(@RequestPart("data") EmployeeDto data,
+                                                     @RequestPart(value = "file", required = false) MultipartFile file) {
+        return employService.update(data,file);
     }
 
     @GetMapping("/employee/detail")
