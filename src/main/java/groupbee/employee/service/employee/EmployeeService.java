@@ -201,8 +201,8 @@ public class EmployeeService {
             response.put("message", "사용자가 존재하지 않습니다.");
             return ResponseEntity.status(401).body(response);
         }
-        if(!file.isEmpty()){
-            employeeDto.setProfileFile("https://minio.bmops.kro.kr/groupbee/"+minioService.uploadFile("groupbee","profile",file));
+        if(file != null && !file.isEmpty()) {
+            employeeDto.setProfileFile("https://minio.bmops.kro.kr/groupbee/profile/"+minioService.uploadFile("groupbee","profile",file));
         }
         EmployeeEntity entity = employeeMapper.toEntity(employeeDto);
         employeeRepository.updateAll(entity);
