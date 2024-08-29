@@ -2,6 +2,7 @@ package groupbee.employee.mapper;
 
 
 import groupbee.employee.dto.employee.EmployeeDto;
+import groupbee.employee.dto.employee.EmployeeUpdateDto;
 import groupbee.employee.entity.EmployeeEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,6 +13,10 @@ public interface EmployeeMapper {
     @Mapping(source = "departmentId", target = "department.id")
     @Mapping(source = "position", target = "position.id")
     EmployeeEntity toEntity(EmployeeDto dto);
+
+    @Mapping(source = "departmentId", target = "department.id")
+    @Mapping(source = "position", target = "position.id")
+    EmployeeEntity updateToEntity(EmployeeUpdateDto dto);
 
     @Mapping(source = "department.id", target = "departmentId")
     @Mapping(source = "position.id", target = "position")

@@ -21,13 +21,13 @@ public class RankEntity implements Serializable {
     public static final String COLUMN_RANK_NAME = "rank";
     private static final long serialVersionUID = -2860881984130740281L;
 
-    private Integer id;
+    private Long id;
 
     private String rank;
 
     @Id
     @Column(name = COLUMN_ID_NAME, nullable = false)
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 

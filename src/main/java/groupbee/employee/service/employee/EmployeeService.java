@@ -6,6 +6,7 @@ import groupbee.employee.dto.email.EmailDto;
 import groupbee.employee.dto.employee.EmployeeDetailDto;
 import groupbee.employee.dto.employee.EmployeeDto;
 import groupbee.employee.dto.employee.EmployeeListDto;
+import groupbee.employee.dto.employee.EmployeeUpdateDto;
 import groupbee.employee.dto.ldap.LdapDto;
 import groupbee.employee.entity.EmailEntity;
 import groupbee.employee.entity.EmployeeEntity;
@@ -14,6 +15,7 @@ import groupbee.employee.mapper.EmployeeMapper;
 import groupbee.employee.repository.EmailRepository;
 import groupbee.employee.repository.EmployeeRepository;
 import groupbee.employee.service.feign.MailFeignClient;
+import groupbee.employee.service.minio.MinioService;
 import groupbee.employee.service.redis.RedisService;
 import groupbee.employee.service.session.SessionService;
 import jakarta.servlet.http.HttpSession;
@@ -24,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -39,6 +42,7 @@ public class EmployeeService {
     private final EmailMapper emailMapper;
     private final SessionService sessionService;
     private final MailFeignClient mailFeignClient;
+    private final MinioService minioService;
     private final Map<String, Object> response = new HashMap<>();
 
     @Transactional
@@ -190,14 +194,17 @@ public class EmployeeService {
     }
 
     @Transactional
-    public ResponseEntity<Map<String, Object>> update(EmployeeDto employeeDto) {
+    public ResponseEntity<Map<String, Object>> update(EmployeeUpdateDto employeeDto) {
         Map<String, Object> response = new HashMap<>();
         if(employeeRepository.countById(employeeDto.getId()) == 0){
             response.put("status", "fail");
             response.put("message", "사용자가 존재하지 않습니다.");
             return ResponseEntity.status(401).body(response);
         }
-        EmployeeEntity entity = employeeMapper.toEntity(employeeDto);
+        if(!employeeDto.getFile().isEmpty()){
+            employeeDto.setProfileFile("https://minio.bmops.kro.kr/groupbee/"+minioService.uploadFile("groupbee","profile",employeeDto.getFile()));
+        }
+        EmployeeEntity entity = employeeMapper.updateToEntity(employeeDto);
         employeeRepository.updateAll(entity);
         response.put("status", "success");
         response.put("message", "사용자가 정보가 변경되었습니다..");
