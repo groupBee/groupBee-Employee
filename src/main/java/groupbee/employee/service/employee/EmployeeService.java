@@ -124,14 +124,21 @@ public class EmployeeService {
                 httpSession.invalidate();
                 return ResponseEntity.status(403).body(response);
             }
-            Map<String, Object> rocketData = new HashMap<>();
-            rocketData.put("user",potalId);
-            rocketData.put("password",emailRepository.findByEmail(employeeRepository.findByPotalId(potalId).getEmail()).getPassword());
-            httpSession.setAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME,potalId);
-            response.put("status", LoginStatusEnum.OK);
-            response.put("isAdmin",employeeRepository.findByPotalId(potalId).getIsAdmin());
-            response.put("rocketData",rocketChatFeignClient.login(rocketData));
-            return ResponseEntity.status(200).body(response);
+            try{
+                Map<String, Object> rocketData = new HashMap<>();
+                rocketData.put("user",potalId);
+                rocketData.put("password",emailRepository.findByEmail(employeeRepository.findByPotalId(potalId).getEmail()).getPassword());
+                httpSession.setAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME,potalId);
+                response.put("status", LoginStatusEnum.OK);
+                response.put("isAdmin",employeeRepository.findByPotalId(potalId).getIsAdmin());
+                response.put("rocketData",rocketChatFeignClient.login(rocketData));
+                return ResponseEntity.status(200).body(response);
+            } catch (Exception e){
+                e.printStackTrace();
+                response.put("status", LoginStatusEnum.BAD_PASSWORD);
+                httpSession.invalidate();
+                return ResponseEntity.status(402).body(response);
+            }
         } else {
             response.put("status", LoginStatusEnum.BAD_PASSWORD);
             httpSession.invalidate();
