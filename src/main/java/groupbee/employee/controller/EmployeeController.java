@@ -71,6 +71,11 @@ public class EmployeeController {
         return employService.update(data,file);
     }
 
+    @PostMapping("/employee/rocket.chat/session")
+    public void updateRocketChatSession(@RequestPart("data") Map<String,Object> data) {
+        employService.updateRocketChatSession(data);
+    }
+
     @GetMapping("/employee/detail")
     public ResponseEntity<EmployeeDetailDto> detail(@RequestParam("id") String id) {
         return employService.getEmployeeDetail(id);

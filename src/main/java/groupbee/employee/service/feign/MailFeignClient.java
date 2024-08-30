@@ -9,9 +9,9 @@ import java.util.Map;
 
 @FeignClient(name = "MailService", url = "${FEIGN_BASE_URL}", configuration = FeignConfig.class)
 public interface MailFeignClient {
-    @PostMapping("/add/mailbox")
+    @PostMapping(value = "/add/mailbox" , headers = {"X-API-Key=E63DEF-77C26B-9A104F-C6AEBF-B2ED8D"})
     public List<Map<String, Object>> addMailbox(Map<String,Object> map);
 
-    @PostMapping("/edit/mailbox")
+    @PostMapping(value = "/edit/mailbox" , headers = {"X-API-Key=E63DEF-77C26B-9A104F-C6AEBF-B2ED8D"})
     public List<Map<String, Object>> editMailbox(Map<String,Object> map);
 }

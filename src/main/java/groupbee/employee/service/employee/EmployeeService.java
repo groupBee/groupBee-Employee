@@ -15,6 +15,7 @@ import groupbee.employee.mapper.EmployeeMapper;
 import groupbee.employee.repository.EmailRepository;
 import groupbee.employee.repository.EmployeeRepository;
 import groupbee.employee.service.feign.MailFeignClient;
+import groupbee.employee.service.feign.RocketChatFeignClient;
 import groupbee.employee.service.minio.MinioService;
 import groupbee.employee.service.redis.RedisService;
 import groupbee.employee.service.session.SessionService;
@@ -41,9 +42,9 @@ public class EmployeeService {
     private final EmailRepository emailRepository;
     private final EmailMapper emailMapper;
     private final SessionService sessionService;
+    private final RocketChatFeignClient rocketChatFeignClient;
     private final MailFeignClient mailFeignClient;
     private final MinioService minioService;
-    private final Map<String, Object> response = new HashMap<>();
 
     @Transactional
     public void save(EmployeeDto dto){
@@ -59,7 +60,7 @@ public class EmployeeService {
                         .id(ldapDto.getAttributes().get("ipaUniqueID").toString())
                         .potalId(ldapDto.getAttributes().get("uid").toString())
                         .name(ldapDto.getAttributes().get("cn").toString())
-                        .position((Long) ldapDto.getAttributes().get("employeeType"))
+                        .position(Long.valueOf(ldapDto.getAttributes().get("employeeType").toString()))
                         .email(ldapDto.getAttributes().get("mail").toString())
                         .extensionCall( ldapDto.getAttributes().get("telephoneNumber").toString())
                         .phoneNumber( ldapDto.getAttributes().get("mobile").toString())
@@ -81,10 +82,21 @@ public class EmployeeService {
                     data.put("active","1");
                     data.put("force_pw_update","0");
                     data.put("tls_enforce_in","1");
+                    Map<String, Object> rocketData = new HashMap<>();
+                    rocketData.put("username",employeeDto.getPotalId());
+                    rocketData.put("email",employeeDto.getEmail());
+                    rocketData.put("password","p@ssw0rd");
+                    rocketData.put("name",employeeDto.getName());
+                    rocketData.put("active",true);
+                    mailFeignClient.addMailbox(data);
+                    rocketChatFeignClient.register(rocketData);
+
                     EmailEntity emailEntity = EmailEntity.builder()
                             .email(employeeDto.getEmail())
                             .password("p@ssw0rd")
                             .build();
+
+
                     emailRepository.save(emailEntity);
                 } else {
                     employeeRepository.updateWithoutPasswd(employeeMapper.toEntity(employeeDto));
@@ -112,9 +124,13 @@ public class EmployeeService {
                 httpSession.invalidate();
                 return ResponseEntity.status(403).body(response);
             }
+            Map<String, Object> rocketData = new HashMap<>();
+            rocketData.put("user",potalId);
+            rocketData.put("password",emailRepository.findByEmail(employeeRepository.findByPotalId(potalId).getEmail()).getPassword());
             httpSession.setAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME,potalId);
             response.put("status", LoginStatusEnum.OK);
             response.put("isAdmin",employeeRepository.findByPotalId(potalId).getIsAdmin());
+            response.put("rocketData",rocketChatFeignClient.login(rocketData));
             return ResponseEntity.status(200).body(response);
         } else {
             response.put("status", LoginStatusEnum.BAD_PASSWORD);
@@ -130,8 +146,9 @@ public class EmployeeService {
             httpSession.invalidate();
             return ResponseEntity.status(400).body(response);
         }
+        String potalId = httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString();
         response.put("status", LoginStatusEnum.OK);
-        response.put("isAdmin",employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getIsAdmin());
+        response.put("isAdmin",employeeRepository.findByPotalId(potalId).getIsAdmin());
         return ResponseEntity.status(200).body(response);
     }
 
@@ -152,14 +169,21 @@ public class EmployeeService {
     @Transactional
     public ResponseEntity<Map<String,Object>> updatePassword(Map<String,Object> data){
         Map<String, Object> response = new HashMap<>();
-        String passwd = employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getPasswd();
-        if(encoder.matches(data.get("old").toString(),passwd)){
+        String potalId = httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString();
+        String passwd = employeeRepository.findByPotalId(potalId).getPasswd();
+        String oldPass = data.get("old").toString();
+        String newPass = data.get("new").toString();
+        if(encoder.matches(oldPass,passwd)){
             Map<String, Object> mailData = new HashMap<>();
-            employeeRepository.updateByPasswd(encoder.encode(data.get("new").toString()),httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString());
-            mailData.put("items", Arrays.asList("email",employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getEmail()));
-            mailData.put("attr",Arrays.asList("password",data.get("new").toString(),"password2",data.get("new").toString()));
+            employeeRepository.updateByPasswd(encoder.encode(newPass),potalId);
+            mailData.put("items", Map.of("email",employeeRepository.findByPotalId(potalId).getEmail()));
+            mailData.put("attr", Map.of("password",newPass,"password2",newPass));
             mailFeignClient.editMailbox(mailData);
-            emailRepository.updateByPasswd(data.get("new").toString(),employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString()).getEmail());
+            Map<String,Object> rocketData = new HashMap<>();
+            rocketData.put("userId",httpSession.getAttribute("rocketUserId").toString());
+            rocketData.put("data",Map.of("password",newPass));
+            rocketChatFeignClient.update(rocketData);
+            emailRepository.updateByPasswd(newPass,employeeRepository.findByPotalId(potalId).getEmail());
             response.put("status", StatusEnum.OK);
             return ResponseEntity.status(200).body(response);
         }
@@ -183,6 +207,7 @@ public class EmployeeService {
 
     @Transactional
     public ResponseEntity<EmailDto> getEmail(){
+        Map<String, Object> response = new HashMap<>();
         EmailDto emailDto = new EmailDto();
         if (httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null) {
             response.put("status", StatusEnum.BAD_REQUEST);
@@ -241,7 +266,6 @@ public class EmployeeService {
         return ResponseEntity.status(200).body(employeeDetail);
     }
 
-
     @Transactional
     public ResponseEntity<List<EmployeeListDto>> getEmployeeList() {
         if(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME) == null){
@@ -278,4 +302,8 @@ public class EmployeeService {
         return ResponseEntity.status(200).body(employeeRepository.findDetailById(id));
     }
 
+    public void updateRocketChatSession(Map<String,Object> data) {
+        httpSession.setAttribute("rocketUserId",data.get("userId"));
+        httpSession.setAttribute("rocketAuthToken",data.get("authToken"));
+    }
 }
