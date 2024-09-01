@@ -38,7 +38,7 @@ public class HRService {
         return data;
     }
 
-    public Object[] getInfoByIdNumber(String idNumber) throws MalformedURLException, XmlRpcException {
-        return OdooClient.employeeInfoById(idNumber);
+    public Map<String,Object> getInfoByIdNumber(String idNumber) throws MalformedURLException, XmlRpcException {
+        return (Map<String, Object>) Objects.requireNonNull(OdooClient.employeeInfoById(idNumber))[0];
     }
 }
