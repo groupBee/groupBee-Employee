@@ -11,8 +11,7 @@ import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -22,10 +21,17 @@ public class HRService {
     private final EmployeeMapper employeeMapper;
 
 
-    public Map<String,Object> getInfo() throws MalformedURLException, XmlRpcException {
-        EmployeeDto employeeDto = employeeMapper.toDto(
-                employeeRepository.findByPotalId(httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString())
+    public EmployeeDto getEmployeeDto() {
+        return employeeMapper.toDto(
+                employeeRepository.findByPotalId(
+                        httpSession.getAttribute(
+                                FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME)
+                                .toString())
         );
+    }
+
+    public Map<String,Object> getInfo() throws MalformedURLException, XmlRpcException {
+        EmployeeDto employeeDto = getEmployeeDto();
         String email = employeeDto.getEmail();
         Map<String,Object> data = (Map<String, Object>) Objects.requireNonNull(OdooClient.employeeInfo(email))[0];
         data.put("memberId",employeeDto.getId());
