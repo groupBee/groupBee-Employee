@@ -23,7 +23,7 @@ public class HRController {
     }
 
     @PostMapping("/info/id")
-    public Object[] getInfoById(String idNumber) throws MalformedURLException, XmlRpcException {
+    public Map<String,Object> getInfoById(String idNumber) throws MalformedURLException, XmlRpcException {
         return hrService.getInfoByIdNumber(idNumber);
     }
 }
