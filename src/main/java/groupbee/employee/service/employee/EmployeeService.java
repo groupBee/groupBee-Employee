@@ -19,9 +19,11 @@ import groupbee.employee.service.feign.RocketChatFeignClient;
 import groupbee.employee.service.minio.MinioService;
 import groupbee.employee.service.redis.RedisService;
 import groupbee.employee.service.session.SessionService;
+import groupbee.employee.service.xml.OdooClient;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.xmlrpc.XmlRpcException;
 import org.hibernate.Hibernate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,6 +31,7 @@ import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
 import java.util.*;
 
 @Service
@@ -45,7 +48,6 @@ public class EmployeeService {
     private final RocketChatFeignClient rocketChatFeignClient;
     private final MailFeignClient mailFeignClient;
     private final MinioService minioService;
-
     @Transactional
     public void save(EmployeeDto dto){
         employeeRepository.save(employeeMapper.toEntity(dto));
@@ -56,38 +58,58 @@ public class EmployeeService {
         Map<String, Object> response = new HashMap<>();
         try {
             ldapDtos.forEach(ldapDto -> {
+                String company_name;
+                String identification_id;
+                String first;
+                String barcode;
+                String email = ldapDto.getAttributes().get("mail").toString();
+                System.out.println(email);
+                try {
+                    Map<String, Object> data = (Map<String, Object>) Objects.requireNonNull(OdooClient.employeeInfo(email))[0];
+                    identification_id = (String) data.get("identification_id");
+                    barcode = (String) data.get("barcode");
+                    first = (String) data.get("first_contract_date");
+                    company_name = (Arrays.asList((Object[]) data.get("company_id"))).get(1).toString();
+                } catch (MalformedURLException | XmlRpcException e) {
+                    throw new RuntimeException(e);
+                }
                 EmployeeDto employeeDto = EmployeeDto.builder()
                         .id(ldapDto.getAttributes().get("ipaUniqueID").toString())
                         .potalId(ldapDto.getAttributes().get("uid").toString())
                         .name(ldapDto.getAttributes().get("cn").toString())
                         .position(Long.valueOf(ldapDto.getAttributes().get("employeeType").toString()))
                         .email(ldapDto.getAttributes().get("mail").toString())
-                        .extensionCall( ldapDto.getAttributes().get("telephoneNumber").toString())
-                        .phoneNumber( ldapDto.getAttributes().get("mobile").toString())
+                        .extensionCall(ldapDto.getAttributes().get("telephoneNumber").toString())
+                        .phoneNumber(ldapDto.getAttributes().get("mobile").toString())
                         .address(ldapDto.getAttributes().get("street").toString())
+                        .email(ldapDto.getAttributes().get("mail").toString())
+                        .companyName(company_name)
+                        .residentRegistrationNumber(identification_id)
+                        .firstDay(first)
+                        .idNumber(barcode)
                         .departmentId(Long.valueOf(ldapDto.getAttributes().get("departmentNumber").toString()))
                         .build();
-                if(employeeRepository.countById(employeeDto.getId()) == 0){
+                if (employeeRepository.countById(employeeDto.getId()) == 0) {
                     Map<String, Object> data = new HashMap<>();
                     employeeDto.setMembershipStatus(true);
                     employeeDto.setIsAdmin(false);
                     employeeDto.setPasswd(encoder.encode("p@ssw0rd"));
                     employeeRepository.save(employeeMapper.toEntity(employeeDto));
-                    data.put("local_part",employeeDto.getPotalId());
-                    data.put("domain","groupbee.co.kr");
-                    data.put("name",employeeDto.getName());
-                    data.put("quota","1024");
-                    data.put("password","p@ssw0rd");
-                    data.put("password2","p@ssw0rd");
-                    data.put("active","1");
-                    data.put("force_pw_update","0");
-                    data.put("tls_enforce_in","1");
+                    data.put("local_part", employeeDto.getPotalId());
+                    data.put("domain", "groupbee.co.kr");
+                    data.put("name", employeeDto.getName());
+                    data.put("quota", "1024");
+                    data.put("password", "p@ssw0rd");
+                    data.put("password2", "p@ssw0rd");
+                    data.put("active", "1");
+                    data.put("force_pw_update", "0");
+                    data.put("tls_enforce_in", "1");
                     Map<String, Object> rocketData = new HashMap<>();
-                    rocketData.put("username",employeeDto.getPotalId());
-                    rocketData.put("email",employeeDto.getEmail());
-                    rocketData.put("password","p@ssw0rd");
-                    rocketData.put("name",employeeDto.getName());
-                    rocketData.put("active",true);
+                    rocketData.put("username", employeeDto.getPotalId());
+                    rocketData.put("email", employeeDto.getEmail());
+                    rocketData.put("password", "p@ssw0rd");
+                    rocketData.put("name", employeeDto.getName());
+                    rocketData.put("active", true);
                     mailFeignClient.addMailbox(data);
                     rocketChatFeignClient.register(rocketData);
 

@@ -37,4 +37,8 @@ public class HRService {
         data.put("memberId",employeeDto.getId());
         return data;
     }
+
+    public Object[] getInfoByIdNumber(String idNumber) throws MalformedURLException, XmlRpcException {
+        return OdooClient.employeeInfoById(idNumber);
+    }
 }
