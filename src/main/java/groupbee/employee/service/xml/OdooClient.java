@@ -15,8 +15,8 @@ import java.util.Map;
 @NoArgsConstructor
 public class OdooClient {
     private static final String db = "groupbee";
-    private static final String url = "http://211.188.52.233:8069";
-    private static final String username = "admin@groupbee.co.kr";
+    private static final String url = "http://211.188.51.234:8069";
+    private static final String username = "kumupaf6998@groupbee.co.kr";
     private static final String password = "p@ssw0rd";
 
     public static Object[] employeeInfo(String email) throws MalformedURLException, XmlRpcException {
