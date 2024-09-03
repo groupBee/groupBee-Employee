@@ -2,6 +2,7 @@ package groupbee.employee.service.xml;
 
 import lombok.NoArgsConstructor;
 import org.apache.xmlrpc.XmlRpcException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
@@ -14,10 +15,10 @@ import java.util.Map;
 
 @NoArgsConstructor
 public class OdooClient {
-    private static final String db = "groupbee";
-    private static final String url = "http://211.188.51.238:8069";
-    private static final String username = "kumupaf6998@groupbee.co.kr";
-    private static final String password = "p@ssw0rd";
+    private static final String db = System.getenv("ODOO_DB");
+    private static final String url = System.getenv("ODOO_URL");
+    private static final String username = System.getenv("ODOO_USERNAME");
+    private static final String password = System.getenv("ODOO_PASSWORD");
 
     public static Object[] employeeInfo(String email) throws MalformedURLException, XmlRpcException {
         XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();

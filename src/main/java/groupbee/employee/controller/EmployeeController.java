@@ -81,4 +81,9 @@ public class EmployeeController {
         return employService.getEmployeeDetail(id);
     }
 
+    @PutMapping("/employee/auth/reset")
+    public ResponseEntity<Map<String,Object>> updateEmail(@RequestPart("data") String id) {
+        return employService.resetPassword(id);
+    }
+
 }

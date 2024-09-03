@@ -152,19 +152,19 @@ public class EmployeeService {
                 rocketData.put("password",emailRepository.findByEmail(employeeRepository.findByPotalId(potalId).getEmail()).getPassword());
                 httpSession.setAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME,potalId);
                 response.put("status", LoginStatusEnum.OK);
-                response.put("isAdmin",employeeRepository.findByPotalId(potalId).getIsAdmin());
                 response.put("rocketData",rocketChatFeignClient.login(rocketData));
+                response.put("isAdmin",employeeRepository.findByPotalId(potalId).getIsAdmin());
                 return ResponseEntity.status(200).body(response);
             } catch (Exception e){
                 e.printStackTrace();
-                response.put("status", LoginStatusEnum.BAD_PASSWORD);
+                response.put("status", LoginStatusEnum.NOT_FOUND);
                 httpSession.invalidate();
-                return ResponseEntity.status(402).body(response);
+                return ResponseEntity.status(403).body(response);
             }
         } else {
-            response.put("status", LoginStatusEnum.BAD_PASSWORD);
+            response.put("status", LoginStatusEnum.NOT_FOUND);
             httpSession.invalidate();
-            return ResponseEntity.status(402).body(response);
+            return ResponseEntity.status(401).body(response);
         }
     }
 
@@ -334,5 +334,18 @@ public class EmployeeService {
     public void updateRocketChatSession(Map<String,Object> data) {
         httpSession.setAttribute("rocketUserId",data.get("userId"));
         httpSession.setAttribute("rocketAuthToken",data.get("authToken"));
+    }
+
+    public ResponseEntity<Map<String,Object>> resetPassword(String id) {
+        String potalId = httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString();
+        if(!employeeRepository.findByPotalId(potalId).getIsAdmin()){
+            httpSession.invalidate();
+            return ResponseEntity.status(400).body(null);
+        }
+        Map<String, Object> response = new HashMap<>();
+        employeeRepository.updateByPasswd(encoder.encode("p@ssw0rd"),id);
+        emailRepository.updateByPasswd("p@ssw0rd",employeeRepository.findByPotalId(id).getEmail());
+        response.put("status", StatusEnum.OK);
+        return ResponseEntity.status(200).body(response);
     }
 }
