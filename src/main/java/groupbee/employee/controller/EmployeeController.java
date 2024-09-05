@@ -83,6 +83,7 @@ public class EmployeeController {
 
     @PutMapping("/employee/auth/reset")
     public ResponseEntity<Map<String,Object>> updateEmail(@RequestPart("data") String potalId) {
+        System.out.println(potalId);
         return employService.resetPassword(potalId);
     }
 
