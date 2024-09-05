@@ -117,8 +117,6 @@ public class EmployeeService {
                             .email(employeeDto.getEmail())
                             .password("p@ssw0rd")
                             .build();
-
-
                     emailRepository.save(emailEntity);
                 } else {
                     employeeRepository.updateWithoutPasswd(employeeMapper.toEntity(employeeDto));

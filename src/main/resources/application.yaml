@@ -45,8 +45,11 @@ spring:
 #        boot:
 #          autoconfigure: DEBUG
 springdoc:
-  swagger-ui:
-    path: /api/employee/swagger-ui
+
+
+
   api-docs:
     path: /api/employee/v3/api-docs
+  swagger-ui:
+    path: /api/employee/swagger-ui
 
