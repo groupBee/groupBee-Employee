@@ -94,6 +94,7 @@ public class EmployeeService {
                     employeeDto.setMembershipStatus(true);
                     employeeDto.setIsAdmin(false);
                     employeeDto.setPasswd(encoder.encode("p@ssw0rd"));
+                    employeeDto.setProfileFile("https://minio.bmops.kro.kr/groupbee/profile/default.png");
                     employeeRepository.save(employeeMapper.toEntity(employeeDto));
                     data.put("local_part", employeeDto.getPotalId());
                     data.put("domain", "groupbee.co.kr");
