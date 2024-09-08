@@ -79,7 +79,6 @@ public class EmployeeService {
                         .extensionCall(ldapDto.getAttributes().get("telephoneNumber").toString())
                         .phoneNumber(ldapDto.getAttributes().get("mobile").toString())
                         .address(ldapDto.getAttributes().get("street").toString())
-                        .email(ldapDto.getAttributes().get("mail").toString())
                         .companyName(company_name)
                         .residentRegistrationNumber(identification_id)
                         .firstDay(first)
@@ -90,8 +89,8 @@ public class EmployeeService {
                     Map<String, Object> data = new HashMap<>();
                     employeeDto.setMembershipStatus(true);
                     employeeDto.setIsAdmin(false);
-                    employeeDto.setPasswd(encoder.encode("p@ssw0rd"));
                     employeeDto.setProfileFile("https://minio.bmops.kro.kr/groupbee/profile/default.png");
+                    employeeDto.setPasswd(encoder.encode("p@ssw0rd"));
                     employeeRepository.save(employeeMapper.toEntity(employeeDto));
                     data.put("local_part", employeeDto.getPotalId());
                     data.put("domain", "groupbee.co.kr");
@@ -148,7 +147,7 @@ public class EmployeeService {
         } else {
             response.put("status", LoginStatusEnum.NOT_FOUND);
             httpSession.invalidate();
-            return ResponseEntity.status(401).body(response);
+            return ResponseEntity.status(402).body(response);
         }
     }
 
