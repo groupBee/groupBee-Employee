@@ -6,7 +6,6 @@ import groupbee.employee.dto.email.EmailDto;
 import groupbee.employee.dto.employee.EmployeeDetailDto;
 import groupbee.employee.dto.employee.EmployeeDto;
 import groupbee.employee.dto.employee.EmployeeListDto;
-import groupbee.employee.dto.employee.EmployeeUpdateDto;
 import groupbee.employee.dto.ldap.LdapDto;
 import groupbee.employee.entity.EmailEntity;
 import groupbee.employee.entity.EmployeeEntity;
@@ -15,7 +14,6 @@ import groupbee.employee.mapper.EmployeeMapper;
 import groupbee.employee.repository.EmailRepository;
 import groupbee.employee.repository.EmployeeRepository;
 import groupbee.employee.service.feign.MailFeignClient;
-import groupbee.employee.service.feign.RocketChatFeignClient;
 import groupbee.employee.service.minio.MinioService;
 import groupbee.employee.service.redis.RedisService;
 import groupbee.employee.service.session.SessionService;
@@ -45,7 +43,6 @@ public class EmployeeService {
     private final EmailRepository emailRepository;
     private final EmailMapper emailMapper;
     private final SessionService sessionService;
-    private final RocketChatFeignClient rocketChatFeignClient;
     private final MailFeignClient mailFeignClient;
     private final MinioService minioService;
     @Transactional
@@ -105,15 +102,7 @@ public class EmployeeService {
                     data.put("active", "1");
                     data.put("force_pw_update", "0");
                     data.put("tls_enforce_in", "1");
-                    Map<String, Object> rocketData = new HashMap<>();
-                    rocketData.put("username", employeeDto.getPotalId());
-                    rocketData.put("email", employeeDto.getEmail());
-                    rocketData.put("password", "p@ssw0rd");
-                    rocketData.put("name", employeeDto.getName());
-                    rocketData.put("active", true);
                     mailFeignClient.addMailbox(data);
-                    rocketChatFeignClient.register(rocketData);
-
                     EmailEntity emailEntity = EmailEntity.builder()
                             .email(employeeDto.getEmail())
                             .password("p@ssw0rd")
@@ -146,12 +135,8 @@ public class EmployeeService {
                 return ResponseEntity.status(403).body(response);
             }
             try{
-                Map<String, Object> rocketData = new HashMap<>();
-                rocketData.put("user",potalId);
-                rocketData.put("password",emailRepository.findByEmail(employeeRepository.findByPotalId(potalId).getEmail()).getPassword());
                 httpSession.setAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME,potalId);
                 response.put("status", LoginStatusEnum.OK);
-                response.put("rocketData",rocketChatFeignClient.login(rocketData));
                 response.put("isAdmin",employeeRepository.findByPotalId(potalId).getIsAdmin());
                 return ResponseEntity.status(200).body(response);
             } catch (Exception e){
@@ -207,10 +192,6 @@ public class EmployeeService {
             mailData.put("items", Map.of("email",employeeRepository.findByPotalId(potalId).getEmail()));
             mailData.put("attr", Map.of("password",newPass,"password2",newPass));
             mailFeignClient.editMailbox(mailData);
-            Map<String,Object> rocketData = new HashMap<>();
-            rocketData.put("userId",httpSession.getAttribute("rocketUserId").toString());
-            rocketData.put("data",Map.of("password",newPass));
-            rocketChatFeignClient.update(rocketData);
             emailRepository.updateByPasswd(newPass,employeeRepository.findByPotalId(potalId).getEmail());
             response.put("status", StatusEnum.OK);
             return ResponseEntity.status(200).body(response);
@@ -330,10 +311,6 @@ public class EmployeeService {
         return ResponseEntity.status(200).body(employeeRepository.findDetailById(id));
     }
 
-    public void updateRocketChatSession(Map<String,Object> data) {
-        httpSession.setAttribute("rocketUserId",data.get("userId"));
-        httpSession.setAttribute("rocketAuthToken",data.get("authToken"));
-    }
 
     public ResponseEntity<Map<String,Object>> resetPassword(String id) {
         String potalId = httpSession.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME).toString();
